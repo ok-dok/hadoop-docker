@@ -52,9 +52,12 @@ RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key; \
 ENV HADOOP_VERSION 3.2.0
 
 # Prepare environment
-ENV HADOOP_HOME /opt/hadoop
-ENV HADOOP_CONF_HOME $HADOOP_HOME/etc/hadoop
-ENV PATH $HADOOP_HOME/bin:$HOADOOP_HOME/sbin:$PATH
+ENV HADOOP_HOME=/opt/hadoop \
+    HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop 
+    # PATH=$HADOOP_HOME/bin:$HOADOOP_HOME/sbin:$PATH
+
+RUN echo export PATH=$HADOOP_HOME/bin:$HOADOOP_HOME/sbin:\$PATH >> /etc/profile;
+
 RUN groupadd --system --gid=9999 hadoop && \
     useradd --system -m --uid=9998 --gid=hadoop -s /bin/bash -c "Hadoop Account" hadoop
 WORKDIR $HADOOP_HOME
@@ -80,13 +83,13 @@ RUN gpg --import KEYS; \
     chown -R hadoop:hadoop .; 
 
 # Copy configuration files
-COPY core-site.xml  ${HADOOP_CONF_HOME}/
-COPY hdfs-site.xml  ${HADOOP_CONF_HOME}/
-COPY yarn-site.xml  ${HADOOP_CONF_HOME}/ 
-COPY mapred-site.xml ${HADOOP_CONF_HOME}/
+COPY core-site.xml  ${HADOOP_CONF_DIR}/
+COPY hdfs-site.xml  ${HADOOP_CONF_DIR}/
+COPY yarn-site.xml  ${HADOOP_CONF_DIR}/ 
+COPY mapred-site.xml ${HADOOP_CONF_DIR}/
 
 # Set JAVA_HOME environment
-RUN echo JAVA_HOME=${JAVA_HOME} >> ${HADOOP_CONF_HOME}/hadoop-env.sh
+RUN echo JAVA_HOME=${JAVA_HOME} >> ${HADOOP_CONF_DIR}/hadoop-env.sh
 
 # Generate ssh rsa key
 WORKDIR /home/hadoop
@@ -103,4 +106,4 @@ RUN chmod 755 /docker-entrypoint.sh
 EXPOSE 22
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
-CMD [ "-d"]
+CMD [ "-log"]
