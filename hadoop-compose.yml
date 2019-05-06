@@ -8,6 +8,8 @@ services:
             hadoop:
                 aliases:
                     - master
+        environment:
+            HADOOP_WORKER_NAMES: master slave1 slave2 
         ports:
             - "50010:50010"
             - "50020:50020"
@@ -27,6 +29,7 @@ services:
             - "8088:8088"
             - "49707:49707"
             - "2122:2122"
+        command: [ "--start-cluster" ]
         
     hadoop-slave1: 
         image: hadoop:latest
@@ -36,6 +39,8 @@ services:
             hadoop:
                 aliases:
                     - slave1
+        environment:
+            HADOOP_WORKER_NAMES: master slave1 slave2 
         expose:
             - "50010"
             - "50020"
@@ -64,6 +69,8 @@ services:
             hadoop:
                 aliases:
                     - slave2
+        environment:
+            HADOOP_WORKER_NAMES: master slave1 slave2 
         expose:
             - "50010"
             - "50020"

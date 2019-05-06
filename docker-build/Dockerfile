@@ -1,34 +1,25 @@
 FROM openjdk:8-jre
 
 # Setup sources
-RUN set -ex; \
-    echo "deb http://mirrors.163.com/debian/ stretch main non-free contrib\
-          deb http://mirrors.163.com/debian/ stretch-updates main non-free contrib\
-          deb http://mirrors.163.com/debian/ stretch-backports main non-free contrib\
-          deb-src http://mirrors.163.com/debian/ stretch main non-free contrib\
-          deb-src http://mirrors.163.com/debian/ stretch-updates main non-free contrib\
-          deb-src http://mirrors.163.com/debian/ stretch-backports main non-free contrib\
-          deb http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib\
-          deb-src http://mirrors.163.com/debian-security/ stretch/updates main non-free contrib" > /etc/apt/sources.list; \
-    apt-get update
+COPY sources.list /etc/apt/
+RUN apt-get update
 
 # Install dependencies
-RUN set -ex; \
-    apt-get -y install apt-utils; \
+RUN apt-get -y install apt-utils; \
     apt-get -y install libsnappy1v5; \
     rm -rf /var/lib/apt/lists/*
 
 # Grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.11
 RUN set -ex; \
-  wget -nv -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"; \
-  wget -nv -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc"; \
-  export GNUPGHOME="$(mktemp -d)"; \
-  for server in ha.pool.sks-keyservers.net $(shuf -e \
-                          hkp://p80.pool.sks-keyservers.net:80 \
-                          keyserver.ubuntu.com \
-                          hkp://keyserver.ubuntu.com:80 \
-                          pgp.mit.edu) ; do \
+  wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"; \
+  wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc";
+RUN export GNUPGHOME="$(mktemp -d)"; \
+  for server in ha.pool.sks-keyservers.net \
+                hkp://p80.pool.sks-keyservers.net:80 \
+                keyserver.ubuntu.com \
+                hkp://keyserver.ubuntu.com:80 \
+                pgp.mit.edu ; do \
       gpg --batch --keyserver "$server" --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && break || : ; \
   done && \
   gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
@@ -52,34 +43,34 @@ RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key; \
 ENV HADOOP_VERSION 3.2.0
 
 # Prepare environment
+COPY hadoop_profile.sh /etc/profile.d/
+RUN . /etc/profile
 ENV HADOOP_HOME=/opt/hadoop \
     HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop 
-    # PATH=$HADOOP_HOME/bin:$HOADOOP_HOME/sbin:$PATH
-
-RUN echo export PATH=$HADOOP_HOME/bin:$HOADOOP_HOME/sbin:\$PATH >> /etc/profile;
 
 RUN groupadd --system --gid=9999 hadoop && \
     useradd --system -m --uid=9998 --gid=hadoop -s /bin/bash -c "Hadoop Account" hadoop
-WORKDIR $HADOOP_HOME
+
+
+WORKDIR ${HADOOP_HOME}
 
 ENV HADOOP_FILE_URL http://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
 ENV HADOOP_ASC_URL https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc
 ENV HADOOP_KEYS_URL https://www.apache.org/dist/hadoop/common/KEYS
 
-# Download Hadoop
+# Download Hadoop and verify
 RUN set -ex; \
-    wget -nv -O hadoop.tar.gz "$HADOOP_FILE_URL"; \
+    wget -O hadoop.tar.gz "$HADOOP_FILE_URL"; \
     wget -nv -O hadoop.tar.gz.asc "$HADOOP_ASC_URL"; \
-    wget -nv -O KEYS "$HADOOP_KEYS_URL";
-
-# Verify and install Hadoop
-RUN gpg --import KEYS; \
+    wget -nv -O KEYS "$HADOOP_KEYS_URL"; \
+    gpg --import KEYS; \
     gpg --verify hadoop.tar.gz.asc hadoop.tar.gz; \
-    rm -rf KEYS hadoop.tar.gz.asc; \
-    \
-    tar -zxf hadoop.tar.gz --strip-components=1; \
+    rm -rf KEYS hadoop.tar.gz.asc; 
+
+# COPY  hadoop.tar.gz ./
+
+RUN tar -zxf hadoop.tar.gz --strip-components=1; \
     rm hadoop.tar.gz; \
-    \
     chown -R hadoop:hadoop .; 
 
 # Copy configuration files
@@ -89,7 +80,8 @@ COPY yarn-site.xml  ${HADOOP_CONF_DIR}/
 COPY mapred-site.xml ${HADOOP_CONF_DIR}/
 
 # Set JAVA_HOME environment
-RUN echo JAVA_HOME=${JAVA_HOME} >> ${HADOOP_CONF_DIR}/hadoop-env.sh
+RUN echo JAVA_HOME=/docker-java-home/jre >> ${HADOOP_CONF_DIR}/hadoop-env.sh; \
+  echo JAVA_HOME=/docker-java-home/jre >> ${HADOOP_CONF_DIR}/yarn-env.sh
 
 # Generate ssh rsa key
 WORKDIR /home/hadoop
@@ -106,4 +98,4 @@ RUN chmod 755 /docker-entrypoint.sh
 EXPOSE 22
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
-CMD [ "-log"]
+CMD [ "-d" ]
