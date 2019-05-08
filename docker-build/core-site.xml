@@ -17,16 +17,25 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-  <property>
-    <name>fs.default.name </name>
-    <value>hdfs://master:9000</value>
-  </property>
+  <!--这里指定hdfs服务发布地址，由于在hdfs-site.xml中指定了逻辑命名服务名称，
+  因此此处不再使用hdfs://master:9000，此处使用命名服务名称-->
 	<property>
     <name>fs.defaultFS</name>
-    <value>hdfs://master:9000</value>
+    <value>hdfs://nncluster</value>
 	</property>
+  <!--指定Hadoop临时目录-->
 	<property>
     <name>hadoop.tmp.dir</name>
     <value>/home/hadoop/tmp</value>
 	</property>
+  <!-- 指定zookeeper会话超时时间 -->
+  <property>
+    <name>ha.zookeeper.session-timeout.ms</name>
+    <value>3000</value>
+  </property>
+  <!--指定Zookeeper服务器的地址，以下为示例配置，docker运行时根据参数配置进行替换-->
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>zk1:2181,zk2:2181,zk3:2181</value>
+  </property>
 </configuration>

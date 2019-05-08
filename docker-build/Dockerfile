@@ -44,23 +44,24 @@ ENV HADOOP_VERSION 3.2.0
 
 # Prepare environment
 COPY hadoop_profile.sh /etc/profile.d/
+
 RUN . /etc/profile
+
 ENV HADOOP_HOME=/opt/hadoop \
     HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop 
 
+# Add hadoop group and user
 RUN groupadd --system --gid=9999 hadoop && \
     useradd --system -m --uid=9998 --gid=hadoop -s /bin/bash -c "Hadoop Account" hadoop
-
-
-WORKDIR ${HADOOP_HOME}
 
 ENV HADOOP_FILE_URL http://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
 ENV HADOOP_ASC_URL https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc
 ENV HADOOP_KEYS_URL https://www.apache.org/dist/hadoop/common/KEYS
 
+WORKDIR ${HADOOP_HOME}
 # Download Hadoop and verify
 RUN set -ex; \
-    wget -O hadoop.tar.gz "$HADOOP_FILE_URL"; \
+    wget -nv -O hadoop.tar.gz "$HADOOP_FILE_URL"; \
     wget -nv -O hadoop.tar.gz.asc "$HADOOP_ASC_URL"; \
     wget -nv -O KEYS "$HADOOP_KEYS_URL"; \
     gpg --import KEYS; \

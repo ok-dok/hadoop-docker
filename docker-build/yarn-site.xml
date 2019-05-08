@@ -14,15 +14,55 @@
 -->
 <configuration>
 
-<!-- Site specific YARN configuration properties -->
-	<property>
-		<name>yarn.resourcemanager.hostname</name>
-		<value>master</value>
-		<description>yarn resourcemanager hostname is master</description>
-	</property>
-	<property>
-		<name>yarn.nodemanager.aux-services</name>
-		<value>mapreduce_shuffle</value>
-		<description>just mapreduce_shuffle can run MapReduce</description>
-1	</property>
+  <!-- Site specific YARN configuration properties -->
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+    <description>just mapreduce_shuffle can run MapReduce</description>
+  </property>
+  <!-- 指定resourcemanager集群的cluster id（自定义） -->
+  <property>
+    <name>yarn.resourcemanager.cluster-id</name>
+    <value>rmcluster</value>
+  </property>
+  <!--开启resourcemanagerHA,默认为false -->
+  <property>
+    <name>yarn.resourcemanager.ha.enabled</name>
+    <value>true</value>
+  </property>
+  <!--开启自动恢复功能 Enable automatic failover; By default, it is enabled only when HA is enabled.-->
+  <property>
+    <name>yarn.resourcemanager.ha.automatic-failover.enabled</name>
+    <value>true</value>
+  </property>
+  
+  <!--设置yarn resourcemanager集群包含的resourcemanager列表，可为每个resourcemanager指定一个ID名称（自定义），
+  分别命名为rm1,rm2-->
+  <property>
+    <name>yarn.resourcemanager.ha.rm-ids</name>
+    <value>rm1,rm2</value>
+  </property>
+  <!--分别指定每个resourcemanager的主机地址，以下为示例设置，docker运行时根据参数配置进行替换-->
+  <property>
+      <name>yarn.resourcemanager.hostname.rm1</name>
+      <value>rm1</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.hostname.rm2</name>
+    <value>rm2</value>
+  </property>
+  <!--分别设置yarn资源管理器的web端地址，格式：主机地址:端口号-->
+  <property>
+    <name>yarn.resourcemanager.webapp.address.rm1</name>
+    <value>rm1:8088</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.webapp.address.rm2</name>
+    <value>rm2:8088</value>
+  </property>
+  <!--设置yarn HA依赖的zookeeper集群地址，以下为示例设置，docker运行是根据参数配置进行替换-->
+  <property>
+    <name>hadoop.zk.address</name>
+    <value>zk1:2181,zk2:2181,zk3:2181</value>
+  </property>
 </configuration>

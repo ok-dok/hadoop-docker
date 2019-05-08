@@ -17,25 +17,95 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
+	<!--设置hdfs的namenode存储位置-->
 	<property>
 		<name>dfs.namenode.name.dir</name>
 		<value>file:/home/hadoop/hdfs/name</value>
 	</property>
+	<!--设置hdfs的datanode存储位置-->
 	<property>
 		<name>dfs.datanode.data.dir</name>
 		<value>file:/home/hadoop/hdfs/data</value>
 	</property>
+	<!--设置datanode副本数，默认为3-->
 	<property>
 		<name>dfs.replication</name>
 		<value>2</value>
 		<description>副本个数（每个本分割的文件会存储在几台datanode上，默认是3），这个数量应该小于datanode机器数</description>
 	</property>
+	<!--设置hdfs访问权限限制-->
 	<property>
 		<name>dfs.permissions.enabled</name>
 		<value>false</value>
 	</property>
+	<!--指定hdfs的命名服务名称（自定义）-->
+	￼<property>
+		<name>dfs.nameservices</name> 
+		<value>nncluster</value>
+		￼￼￼￼￼￼<description>Logical name for this new nameservice</description> 
+	</property>
+	<!--指定hdfs命名服务包含的namenode列表，可为每个namenode指定一个ID名称（自定义），分别命名为nn1，nn2，每个命名服务最多有两个namenode-->
 	<property>
-    	<name>dfs.namenode.http-address</name>
-    	<value>master:50070</value>
+		<name>dfs.ha.namenodes.nncluster</name> 
+		<value>nn1,nn2</value>
+		￼￼￼￼￼￼￼<description>Unique identifiers for each NameNode in the nameservice </description>
+	</property>
+	<!--为每个 NameNode 设置 RPC 地址-->
+	<property> 
+		<name>dfs.namenode.rpc-address.nncluster.nn1</name>
+		<value>nn1:9000</value>
+	</property>
+	<property>
+		<name>dfs.namenode.rpc-address.nncluster.nn2</name>
+		<value>nn2:9000</value> 
+	</property>
+	<!--为每个 NameNode 设置对外的 HTTP 通信地址-->
+	￼<property> 
+		<name>dfs.namenode.http-address.nncluster.nn1</name> 
+		<value>nn1:50070</value>
+	</property>
+	<property>
+		<name>dfs.namenode.http-address.nncluster.nn2</name>
+		<value>nn2:50070</value>
+	￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼</property>
+	<!--
+		设置一组 journalNode 的 URI 地址,Journal node用于同步两个namenode的数据
+		active NameNode 将 edit log 写入这些JournalNode,而 standby NameNode 读取这些 edit log,
+		并作用在内存中的目录树中,该属性 值应符合以下格式:
+		qjournal://host1:port1;host2:port2;host3:port3/journalId
+		注意：JournalNode 默认端口号为 8485
+		以下配置为示例配置，docker运行时根据参数配置进行替换
+	-->
+	<property>
+		￼￼￼<name>dfs.namenode.shared.edits.dir</name>
+		<value>qjournal://master1:8485;master2:8485;slave1:8485/nncluster</value>
+	</property>
+	<!--Journal Node文件存储地址-->
+	<property>
+		<name>dfs.journalnode.edits.dir</name>
+		<value>/home/hadoop/hdfs/journalnode_edits</value>
+	</property>
+	<!--设置HDFS客户端用来连接集群中Active状态NameNode节点的Java类，可自定义实现该类，默认实现为ConfiguredFailoverProxyProvider-->
+	<property>
+		<name>dfs.client.failover.proxy.provider.nn</name>
+		<value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+	</property>
+	<!--必须配置此项，当发生namenode切换状态时，需要杀死原先活跃的namenode服务（称为fence），这里指定杀死服务的一系列方式-->
+	<property>
+		<name>dfs.ha.fencing.methods</name>
+		<value>
+			sshfence
+			shell(/bin/true)
+		</value>
+	</property>
+	<!--指定sshfence需要使用的ssh私玥文件-->
+	<property>
+		<name>dfs.ha.fencing.ssh.private-key-files</name>
+		<value>/home/hadoop/.ssh/id_rsa</value>
+	</property>
+	<!--由于需要配置自动切换Active状态的集群，因此必须开启自动failover机制-->
+	<property>
+		<name>dfs.ha.automatic-failover.enabled</name>
+		<value>true</value>
 	</property>
 </configuration>
