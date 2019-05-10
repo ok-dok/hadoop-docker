@@ -87,7 +87,7 @@
 	</property>
 	<!--设置HDFS客户端用来连接集群中Active状态NameNode节点的Java类，可自定义实现该类，默认实现为ConfiguredFailoverProxyProvider-->
 	<property>
-		<name>dfs.client.failover.proxy.provider.nn</name>
+		<name>dfs.client.failover.proxy.provider.nncluster</name>
 		<value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
 	</property>
 	<!--必须配置此项，当发生namenode切换状态时，需要杀死原先活跃的namenode服务（称为fence），这里指定杀死服务的一系列方式-->
