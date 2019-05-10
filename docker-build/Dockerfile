@@ -92,6 +92,8 @@ RUN mkdir -p tmp hdfs/name hdfs/data .ssh; \
     chown -R hadoop:hadoop .; \
     chmod -R 700 .ssh;
 
+COPY --chown=root:root bootstrap.sh /
+RUN chmod 755 /bootstrap.sh
 # Configure container
 COPY --chown=root:root docker-entrypoint.sh /
 RUN chmod 755 /docker-entrypoint.sh
@@ -99,4 +101,4 @@ RUN chmod 755 /docker-entrypoint.sh
 EXPOSE 22
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
-CMD [ "-d" ]
+CMD [ "/bin/bash" ]

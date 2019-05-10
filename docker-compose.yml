@@ -1,9 +1,9 @@
 version: "2"
 services:
-    hadoop-master:
+    hadoop1:
         image: hadoop:HA
-        container_name: hadoop-master
-        hostname: hadoop-master
+        container_name: hadoop1
+        hostname: hadoop1
         depends_on:
             - zk1
             - zk2
@@ -16,8 +16,8 @@ services:
                     - rm1
         environment:
             ZK_SERVERS: zk1:2181,zk2:2181,zk3:2181
-            HADOOP_WORKER_NAMES: hadoop-master hadoop-standby hadoop-slave1
-            HDFS_JOURNAL_NODES: hadoop-master:8485,hadoop-standby:8485,hadoop-slave1:8485
+            HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
+            HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485
         ports:
             - "50010:50010"
             - "50020:50020"
@@ -38,12 +38,12 @@ services:
             - "49707:49707"
             - "2122:2122"
             - "8485:8485"
-        command: [ "-mjld" ]
+        command: [ "-d" ]
         
-    hadoop-standby: 
+    hadoop2: 
         image: hadoop:HA
-        container_name: hadoop-standby
-        hostname: hadoop-standby
+        container_name: hadoop2
+        hostname: hadoop2
         depends_on:
             - zk1
             - zk2
@@ -56,8 +56,8 @@ services:
                     - rm2
         environment:
             ZK_SERVERS: zk1:2181,zk2:2181,zk3:2181
-            HADOOP_WORKER_NAMES: hadoop-master hadoop-standby hadoop-slave1
-            HDFS_JOURNAL_NODES: hadoop-master:8485,hadoop-standby:8485,hadoop-slave1:8485
+            HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
+            HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485
         expose:
             - "50010"
             - "50020"
@@ -78,12 +78,12 @@ services:
             - "49707"
             - "2122"
             - "8485"
-        command: [ "-sjd" ]
+        command: [ "-d" ]
         
-    hadoop-slave1: 
+    hadoop3: 
         image: hadoop:HA
-        container_name: hadoop-slave1
-        hostname: hadoop-slave1
+        container_name: hadoop3
+        hostname: hadoop3
         depends_on:
             - zk1
             - zk2
@@ -94,8 +94,8 @@ services:
                     - slave1
         environment:
             ZK_SERVERS: zk1:2181,zk2:2181,zk3:2181
-            HADOOP_WORKER_NAMES: hadoop-master hadoop-standby hadoop-slave1
-            HDFS_JOURNAL_NODES: hadoop-master:8485,hadoop-standby:8485,hadoop-slave1:8485 
+            HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
+            HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485 
         expose:
             - "50010"
             - "50020"
@@ -116,7 +116,7 @@ services:
             - "49707"
             - "2122"
             - "8485"
-        command: [ "-jd" ]
+        command: [ "-d" ]
     zk1:
         image: zookeeper:latest
         container_name: zk1
