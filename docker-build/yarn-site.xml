@@ -58,7 +58,7 @@
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address.rm2</name>
-    <value>rm2:8088</value>
+    <value>rm2:8098</value>
   </property>
   <!--设置yarn HA依赖的zookeeper集群地址，以下为示例设置，docker运行是根据参数配置进行替换-->
   <property>

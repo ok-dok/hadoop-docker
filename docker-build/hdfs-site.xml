@@ -53,20 +53,20 @@
 	<!--为每个 NameNode 设置 RPC 地址-->
 	<property> 
 		<name>dfs.namenode.rpc-address.nncluster.nn1</name>
-		<value>nn1:9000</value>
+		<value>nn1:8020</value>
 	</property>
 	<property>
 		<name>dfs.namenode.rpc-address.nncluster.nn2</name>
-		<value>nn2:9000</value> 
+		<value>nn2:8020</value> 
 	</property>
 	<!--为每个 NameNode 设置对外的 HTTP 通信地址-->
 	￼<property> 
 		<name>dfs.namenode.http-address.nncluster.nn1</name> 
-		<value>nn1:50070</value>
+		<value>nn1:9870</value>
 	</property>
 	<property>
 		<name>dfs.namenode.http-address.nncluster.nn2</name>
-		<value>nn2:50070</value>
+		<value>nn2:9872</value>
 	￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼</property>
 	<!--
 		设置一组 journalNode 的 URI 地址,Journal node用于同步两个namenode的数据

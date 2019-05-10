@@ -25,6 +25,21 @@ configure() {
 
 configure
 
+if [ "$1" = '-m' ]; then
+  # Step 1: start journalnodes cluster
+  /bootstrap.sh -s journalnode
+  # Step 2: format namenode 
+  echo N | /bootstrap.sh -f namenode
+  # Step 3: format zookeeper
+  echo Y | /bootstrap.sh -f zk
+  # Step 4: start dfs cluster(contains namenodes, datanodes, ZK Failover controllers)
+  /bootstrap.sh -s dfs
+  # Step 5: start yarn cluster
+  /bootstrap.sh -s yarn
+  # Then you should run command "/bootstrap.sh -b" on annother namenode server.
+  shift
+fi
+
 if [ "$1" = "-d" ]; then
   while true ; do sleep 1000; done
 fi
