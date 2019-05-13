@@ -35,7 +35,7 @@
     <name>yarn.resourcemanager.ha.automatic-failover.enabled</name>
     <value>true</value>
   </property>
-  
+
   <!--设置yarn resourcemanager集群包含的resourcemanager列表，可为每个resourcemanager指定一个ID名称（自定义），
   分别命名为rm1,rm2-->
   <property>
@@ -44,8 +44,8 @@
   </property>
   <!--分别指定每个resourcemanager的主机地址，以下为示例设置，docker运行时根据参数配置进行替换-->
   <property>
-      <name>yarn.resourcemanager.hostname.rm1</name>
-      <value>rm1</value>
+    <name>yarn.resourcemanager.hostname.rm1</name>
+    <value>rm1</value>
   </property>
   <property>
     <name>yarn.resourcemanager.hostname.rm2</name>
@@ -59,6 +59,11 @@
   <property>
     <name>yarn.resourcemanager.webapp.address.rm2</name>
     <value>rm2:8098</value>
+  </property>
+  <!-- 设置yarn最大重试次数 -->
+  <property>
+    <name>yarn.resourcemanager.am.max-attempts</name>
+    <value>4</value>
   </property>
   <!--设置yarn HA依赖的zookeeper集群地址，以下为示例设置，docker运行是根据参数配置进行替换-->
   <property>
