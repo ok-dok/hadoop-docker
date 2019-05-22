@@ -58,7 +58,7 @@
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address.rm2</name>
-    <value>rm2:8098</value>
+    <value>rm2:8088</value>
   </property>
   <!-- 设置yarn最大重试次数 -->
   <property>

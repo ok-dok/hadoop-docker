@@ -1,7 +1,7 @@
 version: "2"
 services:
     hadoop1:
-        image: hadoop:HA
+        image: hadoop:2.9.2-HA
         container_name: hadoop-nn1-rm1
         hostname: hadoop-nn1-rm1
         depends_on:
@@ -29,40 +29,31 @@ services:
             - "8045:8045"
             - "8046:8046"
             - "8047:8047"
+            - "8048:8048"
+            - "8049:8049"
             - "8088:8088"
             - "8089:8089"
             - "8090:8090"
             - "8091:8091"
-            - "8111:8111"
             - "8188:8188"
             - "8190:8190"
             - "8480:8480"
             - "8481:8481"
             - "8485:8485"
             - "8788:8788"
-            - "8888:8888"
-            - "9820:9820"
-            - "9864:9864"
-            - "9865:9865"
-            - "9866:9866"
-            - "9867:9867"
-            - "9868:9868"
-            - "9869:9869"
-            - "9870:9870"
-            - "9871:9871"
-            - "10020:10020"
-            - "10033:10033"
             - "10200:10200"
+            - "50010:50010"
+            - "50020:50020"
+            - "50070:50070"
+            - "50075:50075"
+            - "10020:10020"
             - "19888:19888"
             - "19890:19890"
-            - "50071:50071"
-            - "50072:50072"
-            - "50100:50100"
-            - "50105:50105"
+            - "10033:10033"
         command: [ "-m", "-d" ]
         
     hadoop2: 
-        image: hadoop:HA
+        image: hadoop:2.9.2-HA
         container_name: hadoop-nn2-rm2
         hostname: hadoop-nn2-rm2
         depends_on:
@@ -80,12 +71,12 @@ services:
             HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
             HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485
         ports:
-            - "9872:9872"
-            - "8098:8098"
+            - "9088:8088"
+            - "50071:50070"
         command: [ "-d" ]
         
     hadoop3: 
-        image: hadoop:HA
+        image: hadoop:2.9.2-HA
         container_name: hadoop-slave1
         hostname: hadoop-slave1
         depends_on:
@@ -103,7 +94,7 @@ services:
         command: [ "-d" ]
 
     zk1:
-        image: zookeeper:latest
+        image: okdokey/zookeeper:3.4.14
         container_name: zk1
         hostname: zk1
         networks:
@@ -117,7 +108,7 @@ services:
             ZOO_SERVERS: server.1=zk1:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
 
     zk2:
-        image: zookeeper:latest
+        image: okdokey/zookeeper:3.4.14
         container_name: zk2
         hostname: zk2
         networks:
@@ -133,7 +124,7 @@ services:
             ZOO_SERVERS: server.1=zk1:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
 
     zk3:
-        image: zookeeper:latest
+        image: okdokey/zookeeper:3.4.14
         container_name: zk3
         hostname: zk3
         networks:

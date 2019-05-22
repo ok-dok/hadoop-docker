@@ -12,18 +12,19 @@ help(){
 #---------------------------------------------------------
 # quorumjournal nodes (if any)
 start_journalnodes(){
-  JOURNAL_NODES=$(gosu hadoop ${HADOOP_HOME}/bin/hdfs getconf -journalNodes 2>&-)
+  
+  SHARED_EDITS_DIR=$($HADOOP_HOME/bin/hdfs getconf -confKey dfs.namenode.shared.edits.dir 2>&-)
 
-  if [ "${#JOURNAL_NODES}" != 0 ]; then
-    echo "Starting journal nodes [${JOURNAL_NODES}]"
+  case "$SHARED_EDITS_DIR" in
+    qjournal://*)
+      JOURNAL_NODES=$(echo "$SHARED_EDITS_DIR" | sed 's,qjournal://\([^/]*\)/.*,\1,g; s/;/ /g; s/:[0-9]*//g')
+      echo "Starting journal nodes [$JOURNAL_NODES]"
+      gosu hadoop $HADOOP_HOME/sbin/hadoop-daemons.sh \
+          --config "$HADOOP_CONF_DIR" \
+          --hostnames "$JOURNAL_NODES" \
+          --script "${HADOOP_HOME}/bin//hdfs" start journalnode ;;
+  esac
 
-    gosu hadoop ${HADOOP_HOME}/bin/hdfs \
-        --workers \
-        --config "${HADOOP_CONF_DIR}" \
-        --hostnames "${JOURNAL_NODES}" \
-        --daemon start \
-        journalnode
-  fi
 }
 
 NAMENODES=$(gosu hadoop ${HADOOP_HOME}/bin/hdfs getconf -namenodes 2>/dev/null)
@@ -35,23 +36,19 @@ fi
 # namenodes
 start_namenodes(){
   echo "Starting namenodes on [${NAMENODES}]"
-  gosu hadoop ${HADOOP_HOME}/bin/hdfs \
-      --workers \
-      --config "${HADOOP_CONF_DIR}" \
-      --hostnames "${NAMENODES}" \
-      --daemon start \
-      namenode
+  gosu hadoop $HADOOP_HOME/sbin/hadoop-daemons.sh \
+    --config "$HADOOP_CONF_DIR" \
+    --hostnames "$NAMENODES" \
+    --script "$HADOOP_HOME/bin/hdfs" start namenode
 }
 
 #---------------------------------------------------------
 # datanodes (using default workers file)
 start_datanodes(){
   echo "Starting datanodes"
-  gosu hadoop ${HADOOP_HOME}/bin/hdfs \
-      --workers \
-      --config "${HADOOP_CONF_DIR}" \
-      --daemon start \
-      datanode 
+  gosu hadoop $HADOOP_HOME/sbin/hadoop-daemons.sh \
+    --config "$HADOOP_CONF_DIR" \
+    --script "$HADOOP_HOME/bin/hdfs" start datanode
 }
 
 #---------------------------------------------------------
@@ -61,13 +58,49 @@ start_zkfc(){
   if [[ "${AUTOHA_ENABLED}" = "true" ]]; then
     echo "Starting ZK Failover Controllers on NN hosts [${NAMENODES}]"
 
-    gosu hadoop ${HADOOP_HOME}/bin/hdfs \
-      --workers \
-      --config "${HADOOP_CONF_DIR}" \
-      --hostnames "${NAMENODES}" \
-      --daemon start \
-      zkfc
+    gosu hadoop $HADOOP_HOME/sbin/hadoop-daemons.sh \
+      --config "$HADOOP_CONF_DIR" \
+      --hostnames "$NAMENODES" \
+      --script "$HADOOP_HOME/bin/hdfs" start zkfc
   fi
+}
+
+start_yarn(){
+  MYNAME="${BASH_SOURCE-$0}"
+
+  bin=$(cd -P -- "$(dirname -- "${MYNAME}")" >/dev/null && pwd -P)
+
+  # let's locate libexec...
+  if [[ -n "${HADOOP_HOME}" ]]; then
+    HADOOP_DEFAULT_LIBEXEC_DIR="${HADOOP_HOME}/libexec"
+  else
+    HADOOP_DEFAULT_LIBEXEC_DIR="${bin}/../libexec"
+  fi
+
+  HADOOP_LIBEXEC_DIR="${HADOOP_LIBEXEC_DIR:-$HADOOP_DEFAULT_LIBEXEC_DIR}"
+  # shellcheck disable=SC2034
+  HADOOP_NEW_CONFIG=true
+  if [[ -f "${HADOOP_LIBEXEC_DIR}/yarn-config.sh" ]]; then
+    . "${HADOOP_LIBEXEC_DIR}/yarn-config.sh"
+  else
+    echo "ERROR: Cannot execute ${HADOOP_LIBEXEC_DIR}/yarn-config.sh." 2>&1
+    exit 1
+  fi
+  logicals=$("${HADOOP_HOME}/bin/hdfs" getconf -confKey yarn.resourcemanager.ha.rm-ids 2>&-)
+  logicals=${logicals//,/ }
+  for id in ${logicals}
+  do
+      rmhost=$("${HADOOP_HOME}/bin/hdfs" getconf -confKey "yarn.resourcemanager.hostname.${id}" 2>&-)
+      RMHOSTS="${RMHOSTS} ${rmhost}"
+  done
+  echo "Starting resourcemanagers on [${RMHOSTS}]"
+  gosu hadoop $HADOOP_HOME/sbin/yarn-daemon.sh \
+    --config "${HADOOP_CONF_DIR}" \
+    --hostnames "${RMHOSTS}" start resourcemanager
+
+  echo "Starting nodemanagers"
+  gosu hadoop $HADOOP_HOME/sbin/yarn-daemons.sh \
+    --config "${HADOOP_CONF_DIR}" start nodemanager
 }
 
 ARGS=`getopt -o bf:is:l: --l bootstrapStandby,format:,initializeSharedEdits,start:logs: -n "$0 --help" -- "$@"`
@@ -117,7 +150,8 @@ do
             ;;
             yarn) 
                 # start yarn service on any resourcemananger server node
-                gosu hadoop $HADOOP_HOME/sbin/start-yarn.sh
+                # gosu hadoop $HADOOP_HOME/sbin/start-yarn.sh
+                start_yarn
             ;;
             journalnode)
                 start_journalnodes

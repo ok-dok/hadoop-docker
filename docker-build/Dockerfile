@@ -12,8 +12,8 @@ RUN apt-get -y install apt-utils; \
 # Grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.11
 RUN set -ex; \
-  wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"; \
-  wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc";
+  wget -nv -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"; \
+  wget -nv -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc";
 RUN export GNUPGHOME="$(mktemp -d)"; \
   for server in ha.pool.sks-keyservers.net \
                 hkp://p80.pool.sks-keyservers.net:80 \
@@ -37,10 +37,11 @@ RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key; \
     echo y | ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key; \
     ssh-keygen -q -N "" -t rsa -f /root/.ssh/id_rsa; \
     cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys; \
-    chmod -R 700 /root/.ssh;
+    chmod -R 700 /root/.ssh; \
+    echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config;
 
 # Configure Hadoop version
-ENV HADOOP_VERSION 3.2.0
+ENV HADOOP_VERSION 2.9.2
 
 # Prepare environment
 COPY hadoop_profile.sh /etc/profile.d/
@@ -93,12 +94,21 @@ RUN mkdir -p tmp hdfs/name hdfs/data .ssh; \
     chmod -R 700 .ssh;
 
 COPY --chown=root:root bootstrap.sh /
-RUN chmod 755 /bootstrap.sh
+COPY --chown=root:root start-dfs-cluster.sh /
+COPY --chown=root:root start-yarn-cluster.sh /
+RUN chmod 755 /start-dfs-cluster.sh; \
+  chmod 755 /start-yarn-cluster.sh
+  
 # Configure container
 COPY --chown=root:root docker-entrypoint.sh /
 RUN chmod 755 /docker-entrypoint.sh
-
-EXPOSE 22 8020 8030 8031 8032 8033 8042 8044 8045 8046 8047 8088 8089 8090 8091 8111 8188 8190 8480 8481 8485 8788 8888 9820 9864 9865 9866 9867 9868 9869 9870 9871 10020 10033 10200 19888 19890 50071 50072 50100 50105 
-
+# SSH port
+EXPOSE 22 
+# HDFS ports
+EXPOSE 50010 50020 50070 50075 50090 50470 50475 8485 8480 8481 8020
+# MR ports
+EXPOSE 10020 19888 19890 10033
+# YARN ports
+EXPOSE 8030 8031 8032 8033 8040 8042 8044 8045 8046 8047 8048 8049 8088 8089 8090 8091 8188 8190 10200 8788
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 CMD [ "/bin/bash" ]
