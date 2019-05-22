@@ -70,4 +70,12 @@
     <name>hadoop.zk.address</name>
     <value>zk1:2181,zk2:2181,zk3:2181</value>
   </property>
+  <!-- 最大应用程序主要尝试次数 -->
+  <property>
+    <name>yarn.resourcemanager.am.max-attempts</name>
+    <value>4</value>
+    <description>
+      The maximum number of application master execution attempts.
+    </description>
+  </property>
 </configuration>

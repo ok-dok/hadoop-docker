@@ -60,6 +60,7 @@ EOF
     ssh ${namenodes[1]} "$HADOOP_HOME/bin/hdfs namenode -bootstrapStandby" 2>&1 
     #---------------------------------------------------------
     #stop the first namenode 
+    echo -n "${namenodes[0]}: "
     ssh ${namenodes[0]} "$HADOOP_HOME/sbin/hadoop-daemon.sh \
             --config '$HADOOP_CONF_DIR' \
             --script '$HADOOP_HOME/bin/hdfs' stop namenode" 2>&1

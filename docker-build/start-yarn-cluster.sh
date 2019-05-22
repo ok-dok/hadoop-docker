@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+su - hadoop
 
 bin=$HADOOP_HOME/bin
 
@@ -21,10 +22,15 @@ do
 done
 
 echo "Starting resourcemanagers on [${RMHOSTS}]"
-$HADOOP_HOME/sbin/yarn-daemon.sh \
-    --config "${HADOOP_CONF_DIR}" \
-    --hostnames "${RMHOSTS}" start resourcemanager
+for rmhost in $RMHOSTS ; do
+    echo -n "$rmhost: "
+    ssh $rmhost "$HADOOP_HOME/sbin/yarn-daemon.sh --config '${HADOOP_CONF_DIR}' start resourcemanager" 2>&1
+done
 
 echo "Starting nodemanagers"
 $HADOOP_HOME/sbin/yarn-daemons.sh \
     --config "${HADOOP_CONF_DIR}" start nodemanager
+
+echo "Starting proxyserver"
+$HADOOP_HOME/sbin/yarn-daemon.sh \
+    --config "${HADOOP_CONF_DIR}" start proxyserver
