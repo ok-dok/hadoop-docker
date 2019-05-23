@@ -7,8 +7,8 @@ su - hadoop
 #---------------------------------------------------------
 # format zookeeper
 if [[ ! -f "$HADOOP_HOME/format-zk.lock" ]];then
-    echo N | $HADOOP_HOME/bin/hdfs zkfc -formatZK
-    echo true > $HADOOP_HOME.format-zk.lock
+    $HADOOP_HOME/bin/hdfs zkfc -formatZK
+    echo true > $HADOOP_HOME/format-zk.lock
 fi
 
 #---------------------------------------------------------
