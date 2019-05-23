@@ -8,8 +8,8 @@ service ssh start
 /configure-hadoop.sh
 
 if [ "$1" = '-m' ]; then
-  /start-dfs-cluster.sh
-  /start-yarn-cluster.sh
+  gosu hadoop /start-dfs-cluster.sh
+  gosu hadoop /start-yarn-cluster.sh
   shift
 fi
 
