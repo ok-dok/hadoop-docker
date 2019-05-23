@@ -31,6 +31,5 @@ echo "Starting nodemanagers"
 $HADOOP_HOME/sbin/yarn-daemons.sh \
     --config "${HADOOP_CONF_DIR}" start nodemanager
 
-echo "Starting proxyserver"
 $HADOOP_HOME/sbin/yarn-daemon.sh \
     --config "${HADOOP_CONF_DIR}" start proxyserver
