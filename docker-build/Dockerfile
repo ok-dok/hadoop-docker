@@ -93,15 +93,13 @@ RUN mkdir -p tmp hdfs/name hdfs/data .ssh; \
     chown -R hadoop:hadoop .; \
     chmod -R 700 .ssh;
 
-COPY --chown=root:root bootstrap.sh /
-COPY --chown=root:root start-dfs-cluster.sh /
-COPY --chown=root:root start-yarn-cluster.sh /
-RUN chmod 755 /start-dfs-cluster.sh; \
-  chmod 755 /start-yarn-cluster.sh
-  
-# Configure container
-COPY --chown=root:root docker-entrypoint.sh /
-RUN chmod 755 /docker-entrypoint.sh
+COPY bootstrap.sh /
+COPY configure-hadoop.sh /
+COPY start-dfs-cluster.sh /
+COPY start-yarn-cluster.sh /
+COPY docker-entrypoint.sh /
+RUN chmod +x /start-dfs-cluster.sh /start-yarn-cluster.sh /configure-hadoop.sh /docker-entrypoint.sh
+
 # SSH port
 EXPOSE 22 
 # HDFS ports
