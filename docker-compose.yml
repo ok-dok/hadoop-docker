@@ -94,7 +94,7 @@ services:
         command: [ "-d" ]
 
     zk1:
-        image: 31z4/zookeeper
+        image: zookeeper
         hostname: zk1
         container_name: zk1
         networks: 
@@ -108,7 +108,7 @@ services:
             ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
 
     zk2:
-        image: 31z4/zookeeper
+        image: zookeeper
         hostname: zk2
         container_name: zk2
         networks: 
@@ -122,7 +122,7 @@ services:
             ZOO_SERVERS: server.1=zk1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zk3:2888:3888
 
     zk3:
-        image: 31z4/zookeeper
+        image: zookeeper
         hostname: zk3
         container_name: zk3
         networks: 
