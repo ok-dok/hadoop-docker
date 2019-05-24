@@ -81,7 +81,7 @@
   <!-- RM 最小内存 -->
   <property>
     <name>yarn.scheduler.minimum-allocation-mb</name>
-    <value>512</value>
+    <value>128</value>
   </property>
   <!-- RM 最大内存 -->
   <property>
