@@ -81,7 +81,7 @@
   <!-- RM 最小内存 -->
   <property>
     <name>yarn.scheduler.minimum-allocation-mb</name>
-    <value>128</value>
+    <value>1024</value>
   </property>
   <!-- RM 最大内存 -->
   <property>
@@ -92,5 +92,10 @@
   <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
     <value>4096</value>
+  </property>
+  <!-- 虚拟内存大小预定系数（虚拟内存大小限制为：实际分配的物理内存 × 预定系数（默认2.1）），这里调整为5 -->
+  <property>
+    <name>yarn.nodemanager.vmem-pmem-ratio</name>
+    <value>5</value>
   </property>
 </configuration>
