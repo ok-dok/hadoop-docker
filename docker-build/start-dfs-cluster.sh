@@ -52,7 +52,7 @@ if [[ ${#namenodes[@]} -le 1 ]]; then
 fi
 ssh ${namenodes[1]} "echo N | $HADOOP_HOME/bin/hdfs namenode -bootstrapStandby" 2>&1 
 #---------------------------------------------------------
-#stop the secondary namenode 
+#start the secondary namenode 
 echo -n "${namenodes[1]}: "
 ssh ${namenodes[1]} "$HADOOP_HOME/sbin/hadoop-daemon.sh \
         --config '$HADOOP_CONF_DIR' \
