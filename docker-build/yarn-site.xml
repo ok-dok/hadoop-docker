@@ -78,4 +78,19 @@
       The maximum number of application master execution attempts.
     </description>
   </property>
+  <!-- RM 最小内存 -->
+  <property>
+    <name>yarn.scheduler.minimum-allocation-mb</name>
+    <value>512</value>
+  </property>
+  <!-- RM 最大内存 -->
+  <property>
+    <name>yarn.scheduler.maximum-allocation-mb</name>
+    <value>4096</value>
+  </property>
+  <!-- 节点最大可用内存 -->
+  <property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value>4096<value>
+  <property>
 </configuration>
