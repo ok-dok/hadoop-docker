@@ -60,17 +60,12 @@
     <name>yarn.resourcemanager.webapp.address.rm2</name>
     <value>rm2:8088</value>
   </property>
-  <!-- 设置yarn最大重试次数 -->
-  <property>
-    <name>yarn.resourcemanager.am.max-attempts</name>
-    <value>4</value>
-  </property>
   <!--设置yarn HA依赖的zookeeper集群地址，以下为示例设置，docker运行是根据参数配置进行替换-->
   <property>
     <name>hadoop.zk.address</name>
     <value>zk1:2181,zk2:2181,zk3:2181</value>
   </property>
-  <!-- 最大应用程序主要尝试次数 -->
+  <!-- Yarn Application 最大尝试启动次数 -->
   <property>
     <name>yarn.resourcemanager.am.max-attempts</name>
     <value>4</value>
@@ -78,12 +73,12 @@
       The maximum number of application master execution attempts.
     </description>
   </property>
-  <!-- RM 最小内存 -->
+  <!-- 单个 Container 可申请的最小内存 -->
   <property>
     <name>yarn.scheduler.minimum-allocation-mb</name>
     <value>1024</value>
   </property>
-  <!-- RM 最大内存 -->
+  <!-- 单个 Container 可申请的最大内存 -->
   <property>
     <name>yarn.scheduler.maximum-allocation-mb</name>
     <value>4096</value>
@@ -97,5 +92,10 @@
   <property>
     <name>yarn.nodemanager.vmem-pmem-ratio</name>
     <value>5</value>
+  </property>
+  <!-- 虚拟内核数，推荐将该值设值为与物理机器的逻辑CPU核数数目相同 -->
+  <property>
+    <name>yarn.nodemanager.resource.cpu-vcores</name>
+    <value>8</value>
   </property>
 </configuration>
