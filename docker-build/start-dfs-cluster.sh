@@ -75,7 +75,7 @@ $HADOOP_HOME/sbin/hadoop-daemons.sh \
 
 #---------------------------------------------------------
 # start ZK Failover controllers, if auto-HA is enabled
-AUTOHA_ENABLED=$(gosu hadoop ${HADOOP_HOME}/bin/hdfs getconf -confKey dfs.ha.automatic-failover.enabled | tr '[:upper:]' '[:lower:]')
+AUTOHA_ENABLED=$(${HADOOP_HOME}/bin/hdfs getconf -confKey dfs.ha.automatic-failover.enabled | tr '[:upper:]' '[:lower:]')
 if [[ "${AUTOHA_ENABLED}" = "true" ]]; then
 echo "Starting ZK Failover Controllers on NN hosts [${NAMENODES}]"
 
