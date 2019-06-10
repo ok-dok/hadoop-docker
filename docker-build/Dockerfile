@@ -1,4 +1,4 @@
-FROM openjdk:8-jre
+FROM openjdk:8u212-jre
 
 # Setup sources
 COPY sources.list /etc/apt/
@@ -7,13 +7,14 @@ RUN apt-get update
 # Install dependencies
 RUN apt-get -y install apt-utils; \
     apt-get -y install libsnappy1v5; \
+    apt-get -y install axel; \
     rm -rf /var/lib/apt/lists/*
 
 # Grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.11
 RUN set -ex; \
-  wget -nv -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"; \
-  wget -nv -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc";
+  axel -qkn 4 -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)"; \
+  axel -qkn 4 -o /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc";
 RUN export GNUPGHOME="$(mktemp -d)"; \
   for server in ha.pool.sks-keyservers.net \
                 hkp://p80.pool.sks-keyservers.net:80 \
@@ -55,22 +56,26 @@ ENV HADOOP_HOME=/opt/hadoop \
 RUN groupadd --system --gid=9999 hadoop && \
     useradd --system -m --uid=9998 --gid=hadoop -s /bin/bash -c "Hadoop Account" hadoop
 
-ENV HADOOP_FILE_URL http://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+ENV HADOOP_URL_TSINGHUA http://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+ENV HADOOP_URL_BIT http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+ENV HADOOP_URL_DEFAULT https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+ENV HADOOP_URL_EU https://www-eu.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+ENV HADOOP_URL_US https://www-us.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+
 ENV HADOOP_ASC_URL https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc
 ENV HADOOP_KEYS_URL https://www.apache.org/dist/hadoop/common/KEYS
 
 WORKDIR ${HADOOP_HOME}
 # Download Hadoop and verify
 RUN set -ex; \
-    wget -nv -O hadoop.tar.gz "$HADOOP_FILE_URL"; \
-    wget -nv -O hadoop.tar.gz.asc "$HADOOP_ASC_URL"; \
-    wget -nv -O KEYS "$HADOOP_KEYS_URL"; \
+    axel -qkn 20 -o hadoop.tar.gz "${HADOOP_URL_TSINGHUA}" "${HADOOP_URL_BIT}" "${HADOOP_URL_DEFAULT}" "${HADOOP_URL_EU}" "${HADOOP_URL_US}"; \
+    axel -qkn 4 -o hadoop.tar.gz.asc "$HADOOP_ASC_URL"; \
+    axel -qkn 4 -o KEYS "$HADOOP_KEYS_URL"; \
     gpg --import KEYS; \
     gpg --verify hadoop.tar.gz.asc hadoop.tar.gz; \
     rm -rf KEYS hadoop.tar.gz.asc; 
 
 # COPY  hadoop.tar.gz ./
-
 RUN tar -zxf hadoop.tar.gz --strip-components=1; \
     rm hadoop.tar.gz; \
     chown -R hadoop:hadoop .; 
@@ -94,11 +99,12 @@ RUN mkdir -p tmp hdfs/name hdfs/data .ssh; \
     chmod -R 700 .ssh;
 
 COPY bootstrap.sh /
+COPY hadoop-tools.sh /
 COPY configure-hadoop.sh /
 COPY start-dfs-cluster.sh /
 COPY start-yarn-cluster.sh /
 COPY docker-entrypoint.sh /
-RUN chmod +x /start-dfs-cluster.sh /start-yarn-cluster.sh /configure-hadoop.sh /docker-entrypoint.sh
+RUN chmod +x /start-dfs-cluster.sh /start-yarn-cluster.sh /configure-hadoop.sh /docker-entrypoint.sh /hadoop-tools.sh
 
 # SSH port
 EXPOSE 22 
