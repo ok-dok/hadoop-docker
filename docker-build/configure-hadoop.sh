@@ -27,7 +27,8 @@ fi
 # Configure journalnodes 
 if [ -n "$HDFS_JOURNAL_NODES" ]; then 
     journodes=`echo $HDFS_JOURNAL_NODES | sed 's/[, ]/;/g'`
-    /hadoop-tools.sh setconf -f ${HDFS_SITE_FILE} -n "dfs.namenode.shared.edits.dir" -v "${journodes}"
+    nameservice=`/hadoop-tools.sh getconf -f "${HDFS_SITE_FILE}" -n "dfs.nameservices"`
+    /hadoop-tools.sh setconf -f ${HDFS_SITE_FILE} -n "dfs.namenode.shared.edits.dir" -v "qjournal://${journodes}/${nameservice}"
 fi
 
 # Configure AM's maximum execution attempts.
