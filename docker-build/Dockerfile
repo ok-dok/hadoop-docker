@@ -89,8 +89,8 @@ COPY yarn-site.xml  ${HADOOP_CONF_DIR}/
 COPY mapred-site.xml ${HADOOP_CONF_DIR}/
 
 # Set JAVA_HOME environment
-RUN echo JAVA_HOME=/docker-java-home/jre >> ${HADOOP_CONF_DIR}/hadoop-env.sh; \
-  echo JAVA_HOME=/docker-java-home/jre >> ${HADOOP_CONF_DIR}/yarn-env.sh
+RUN echo JAVA_HOME=/usr/local/openjdk-8 >> ${HADOOP_CONF_DIR}/hadoop-env.sh; \
+  echo JAVA_HOME=/usr/local/openjdk-8 >> ${HADOOP_CONF_DIR}/yarn-env.sh
 
 # Generate ssh rsa key
 WORKDIR /home/hadoop
