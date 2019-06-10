@@ -65,7 +65,7 @@
     <name>hadoop.zk.address</name>
     <value>zk1:2181,zk2:2181,zk3:2181</value>
   </property>
-  <!-- Yarn Application 最大尝试启动次数 -->
+  <!-- Yarn ApplicationMaster 最大尝试启动次数 -->
   <property>
     <name>yarn.resourcemanager.am.max-attempts</name>
     <value>4</value>
