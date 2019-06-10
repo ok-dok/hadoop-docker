@@ -66,10 +66,12 @@ ENV HADOOP_ASC_URL https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VER
 ENV HADOOP_KEYS_URL https://www.apache.org/dist/hadoop/common/KEYS
 
 WORKDIR ${HADOOP_HOME}
-# Download Hadoop and verify
+# Download Hadoop Files
 RUN set -ex; \
-    axel -qkn 20 -o hadoop.tar.gz "${HADOOP_URL_TSINGHUA}" "${HADOOP_URL_BIT}" "${HADOOP_URL_DEFAULT}" "${HADOOP_URL_EU}" "${HADOOP_URL_US}"; \
-    axel -qkn 4 -o hadoop.tar.gz.asc "$HADOOP_ASC_URL"; \
+    axel -qkn 20 -o hadoop.tar.gz "${HADOOP_URL_TSINGHUA}" "${HADOOP_URL_BIT}" "${HADOOP_URL_DEFAULT}" "${HADOOP_URL_EU}" "${HADOOP_URL_US}";
+
+# Verify hadoop file
+RUN axel -qkn 4 -o hadoop.tar.gz.asc "$HADOOP_ASC_URL"; \
     axel -qkn 4 -o KEYS "$HADOOP_KEYS_URL"; \
     gpg --import KEYS; \
     gpg --verify hadoop.tar.gz.asc hadoop.tar.gz; \
