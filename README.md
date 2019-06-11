@@ -28,7 +28,7 @@ docker-compose -f docker-compose.yml stop   #关闭容器服务集群
 version: "2"
 services:
     hadoop1:
-        image: okdokey/hadoop:2.9.2-HA
+        image: hadoop:2.9.2-HA
         container_name: hadoop-nn1-rm1
         hostname: hadoop-nn1-rm1
         depends_on:
@@ -45,6 +45,12 @@ services:
             ZK_SERVERS: zk1:2181,zk2:2181,zk3:2181
             HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
             HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485
+            YARN_RM_AM_MAX_ATTEMPTS: 4
+            YARN_APP_MIN_MEMORY: 512
+            YARN_APP_MAX_MEMORY: 4096
+            YARN_NM_MEMROY: 4096
+            YARN_NM_VMEM_PMEM_RATIO: 5
+            YARN_NM_CPU_VCORES: 2
         ports:
             - "8020:8020"
             - "8030:8030"
@@ -80,7 +86,7 @@ services:
         command: [ "-m", "-d" ]
         
     hadoop2: 
-        image: okdokey/hadoop:2.9.2-HA
+        image: hadoop:2.9.2-HA
         container_name: hadoop-nn2-rm2
         hostname: hadoop-nn2-rm2
         depends_on:
@@ -97,13 +103,19 @@ services:
             ZK_SERVERS: zk1:2181,zk2:2181,zk3:2181
             HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
             HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485
+            YARN_RM_AM_MAX_ATTEMPTS: 4
+            YARN_APP_MIN_MEMORY: 512
+            YARN_APP_MAX_MEMORY: 4096
+            YARN_NM_MEMROY: 4096
+            YARN_NM_VMEM_PMEM_RATIO: 5
+            YARN_NM_CPU_VCORES: 2
         ports:
             - "9088:8088"
             - "50071:50070"
         command: [ "-d" ]
         
     hadoop3: 
-        image: okdokey/hadoop:2.9.2-HA
+        image: hadoop:2.9.2-HA
         container_name: hadoop-slave1
         hostname: hadoop-slave1
         depends_on:
@@ -118,10 +130,16 @@ services:
             ZK_SERVERS: zk1:2181,zk2:2181,zk3:2181
             HADOOP_WORKER_NAMES: hadoop1 hadoop2 hadoop3
             HDFS_JOURNAL_NODES: hadoop1:8485,hadoop2:8485,hadoop3:8485 
+            YARN_RM_AM_MAX_ATTEMPTS: 4
+            YARN_APP_MIN_MEMORY: 512
+            YARN_APP_MAX_MEMORY: 4096
+            YARN_NM_MEMROY: 4096
+            YARN_NM_VMEM_PMEM_RATIO: 5
+            YARN_NM_CPU_VCORES: 2
         command: [ "-d" ]
 
     zk1:
-        image: zookeeper
+        image: okdokey/zookeeper:3.4.14
         hostname: zk1
         container_name: zk1
         networks: 
@@ -131,11 +149,11 @@ services:
         ports:
             - 2181:2181
         environment:
-            ZOO_MY_ID: 1
-            ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
+            ZK_MY_ID: 1
+            ZK_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
 
     zk2:
-        image: zookeeper
+        image: okdokey/zookeeper:3.4.14
         hostname: zk2
         container_name: zk2
         networks: 
@@ -145,11 +163,11 @@ services:
         ports:
             - 2182:2181
         environment:
-            ZOO_MY_ID: 2
-            ZOO_SERVERS: server.1=zk1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zk3:2888:3888
+            ZK_MY_ID: 2
+            ZK_SERVERS: server.1=zk1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zk3:2888:3888
 
     zk3:
-        image: zookeeper
+        image: okdokey/zookeeper:3.4.14
         hostname: zk3
         container_name: zk3
         networks: 
@@ -159,10 +177,12 @@ services:
         ports:
             - 2183:2181
         environment:
-            ZOO_MY_ID: 3
-            ZOO_SERVERS: server.1=zk1:2888:3888 server.2=zk2:2888:3888 server.3=0.0.0.0:2888:3888
+            ZK_MY_ID: 3
+            ZK_SERVERS: server.1=zk1:2888:3888 server.2=zk2:2888:3888 server.3=0.0.0.0:2888:3888
+
 networks: 
     hadoop:
+
 ```
 ## 2. 自行构建镜像
 
@@ -171,12 +191,6 @@ networks:
 ```
 docker build -t hadoop:2.9.2-HA docker-build/
 ```
-
-或者直接使用根目录下的docker-compose.yml文件进行构建和启动容器集群，
-使用docker-compose可以直接构建镜像，并启动服务集群，只需要一条简单的命令：
-
-```
-docker-compose up
-```
+然后使用`docker-compose`启动集群即可。
 
 正常情况这样hadoop高可用集群就启动成功了，访问localhost:8088可以查看yarn集群状态，localhost:50070可以查看dfs状态
